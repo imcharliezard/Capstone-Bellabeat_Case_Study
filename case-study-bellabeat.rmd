@@ -1,4 +1,5 @@
 # %% [code]
+# %% [code]
 ---
 title: "Bellabeat Case Study in R"
 date: "`r Sys.Date()`"
@@ -35,8 +36,7 @@ In this project, we will go through the data analysis phases of:
 -   Analyze
 -   Share
 
-For this project, I chose to use R, as I find it more challenging and
-versatile.
+
 
 # Ask
 
