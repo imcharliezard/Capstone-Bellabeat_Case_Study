@@ -3,7 +3,7 @@ src="https://cdn.vox-cdn.com/thumbor/-k7jfv5SeTafw1DaJMG4vtNlFIE=/0x0:2134x1424/
 </center>
 
 
-<center><h1>INTRODUCTION<h/1></center>
+<center><h1>INTRODUCTION<1h1></center>
 ***
 
 This case study is a data analysis project under Google data analytics course for a high-tech
@@ -23,7 +23,7 @@ In this project, we will go through the data analysis phases of:
 
 
 
-# ASK
+<center><h1>ASK</h1></center>
 ***
 
 There are three questions that will guide our analysis:
@@ -37,7 +37,7 @@ There are three questions that will guide our analysis:
 
 Find how Bellabeat's customers use the company's wearable smart device.
 
-# PREPARE
+<center><h1>PREPARE</h1></center>
 ***
 
 ## The Data
@@ -216,7 +216,7 @@ unique users in the *weight_log data* frame.
     *total_time_awake*, in the *daily_sleep* date frame, for the
     difference between *total_time_in_bed* and *total_time_asleep*
 
-# PROCESS
+<center><h1>PROCESS</h1></center>
 ***
 
 ## Cleaning and Preparing Data for Analysis
@@ -620,7 +620,7 @@ head(hourly_activity, 10)
 This concludes the **Process** phase. We can now continue to the
 **Analyze** phase for some analysis and visualization of our data.
 
-# ANALYZE
+<center><h1>ANALYZE</h1></center>
 ***
 
 ## Descriptive Analysis {.tabset .tabset-fade .tabset-pills}
@@ -1818,7 +1818,7 @@ ggplot(bmi_cats,
 
 Again, We can see that all but three of the participating users are classified as **overweight** or **obese**, as defined by the *National Heart, Lung, and Blood Institute*.
 
-# SHARE
+<center><h1>SHARE</h1></center>
 ***
                                                                          
 ## Key takeaways 
