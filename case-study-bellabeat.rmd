@@ -3,7 +3,7 @@ src="https://cdn.vox-cdn.com/thumbor/-k7jfv5SeTafw1DaJMG4vtNlFIE=/0x0:2134x1424/
 </center>
 
 
-<center><h1>INTRODUCTION<1h1></center>
+<center><h1>INTRODUCTION</h1></center>
 ***
 
 This case study is a data analysis project under Google data analytics course for a high-tech
