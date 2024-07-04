@@ -1,7 +1,4 @@
 <center><img
-src="https://www.google.com/url?sa=i&url=https%3A%2F%2Frpubs.com%2FDaphaneLove%2Fbellabeat&psig=AOvVaw1IeIMOZy0qIkaTr0akT1M8&ust=1720190162786000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCIjturPOjYcDFQAAAAAdAAAAABAE"
-</center>
-<center><img
 src="https://cdn.vox-cdn.com/thumbor/-k7jfv5SeTafw1DaJMG4vtNlFIE=/0x0:2134x1424/920x613/filters:focal(897x542:1237x882):format(webp)/cdn.vox-cdn.com/uploads/chorus_image/image/69137363/47268.0.jpeg">
 </center>
 
@@ -18,11 +15,11 @@ tracker smart devices.
 
 In this project, we will go through the data analysis phases of:
 
-- Ask
-- Prepare
-- Process
-- Analyze
-- Share
+1. Ask
+2. Prepare
+3. Process
+4. Analyze
+5. Share
 
 
 
@@ -1830,9 +1827,10 @@ ggplot(bmi_cats,
 Again, We can see that all but three of the participating users are classified as **overweight** or **obese**, as defined by the *National Heart, Lung, and Blood Institute*.
 
 # SHARE
-***                                                                         
+***
+                                                                         
 
-## Key takeaways 
+```## Key takeaways 
                                                                          
 1. The descriptive analysis of the **heart rate** data revealed that in some cases, heart rates **bottomed at 36 beats per minute and topped at 203**. For moderate-intensity physical activity, the target heart rate should be between 64% and 76%^[Deborah Riebe, Jonathan K Ehrman, Gary Liguori, Meir Magal. Chapter 6 General Principles of Exercise Prescription. In: ACSM’s Guidelines for Exercise Testing and Prescription. 10th Ed. Wolters Kluwer/Lippincott Williams & Wilkins, Philadelphia, PA: 2018, 143-179.] ^[Physical Activity Guidelines Advisory Committee. Physical Activity Guidelines Advisory Committee Report, 2008. Washington, DC: U.S. Dept of Health and Human Services; 2008.], and shouldn't fall below 40 beats per minute. 
 Bellabeat should consider, if not yet available, to allow users to set warning criteria for when heartbeat exceeds certain preset beats per minutes.
@@ -1849,3 +1847,4 @@ Bellabeat should consider, if not yet available, to allow users to set warning c
 6. Weight log analysis showed that the majority of participating users were classified as *overweight*. Although a sensitive subject, being overweight can pose many health risks, specifically cardiovascular. Bellabeat should encourage more users to use the weight log features and encourage users to reduce their BMI and maintain healthy weight. This can be done with notifications and a reward system on the app.
 
 <br>
+```
