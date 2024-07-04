@@ -101,21 +101,6 @@ library(grid) # for data visualization
 library(gridExtra) # for data visualization
 library(reshape2) # for reshaping data
 ```
-cat("Libraries loaded:\n")
-cat("- tidyverse\n")
-cat("- kableExtra\n")
-cat("- janitor\n")
-cat("- ggplot2\n")
-cat("- gganimate\n")
-cat("- knitr\n")
-cat("- gifski\n")
-cat("- plotly\n")
-cat("- scales\n")
-cat("- viridis\n")
-cat("- grid\n")
-cat("- gridExtra\n")
-cat("- reshape2\n")
-
 
 <br>
 
