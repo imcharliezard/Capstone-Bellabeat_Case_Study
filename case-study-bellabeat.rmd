@@ -88,7 +88,7 @@ cleaning, analyzing, and visualizing data.
 
 Let's begin by loading these R packages.
 
-```{r message=FALSE, include=FALSE}
+```{r setup, include=FALSE}
 library(tidyverse) # for data cleaning and organizing
 library(janitor) # for data clean up
 library(ggplot2) # for data visualization
