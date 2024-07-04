@@ -88,8 +88,7 @@ cleaning, analyzing, and visualizing data.
 
 Let's begin by loading these R packages.
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```{r message=FALSE, include=FALSE}
 library(tidyverse) # for data cleaning and organizing
 library(janitor) # for data clean up
 library(ggplot2) # for data visualization
