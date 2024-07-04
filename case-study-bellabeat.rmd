@@ -89,6 +89,7 @@ cleaning, analyzing, and visualizing data.
 Let's begin by loading these R packages.
 
 ```{r setup, include=FALSE}
+
 library(tidyverse) # for data cleaning and organizing
 library(kableExtra)   # For viewing tables in an awesome way!
 library(janitor) # for data clean up
