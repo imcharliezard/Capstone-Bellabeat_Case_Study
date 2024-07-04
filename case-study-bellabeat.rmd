@@ -26,14 +26,6 @@ In this project, we will go through the data analysis phases of:
 # ASK
 ***
 
-## The Stakeholders
-
--   Urška Sršen, co-founder and CPO
--   Sando Mur, co-founder
--   Marketing Analytics team
-
-## Three Questions
-
 There are three questions that will guide our analysis:
 
 1.  What are some trends in smart device usage?
@@ -1829,8 +1821,8 @@ Again, We can see that all but three of the participating users are classified a
 # SHARE
 ***
                                                                          
-
-```## Key takeaways 
+```
+## Key takeaways 
                                                                          
 1. The descriptive analysis of the **heart rate** data revealed that in some cases, heart rates **bottomed at 36 beats per minute and topped at 203**. For moderate-intensity physical activity, the target heart rate should be between 64% and 76%^[Deborah Riebe, Jonathan K Ehrman, Gary Liguori, Meir Magal. Chapter 6 General Principles of Exercise Prescription. In: ACSM’s Guidelines for Exercise Testing and Prescription. 10th Ed. Wolters Kluwer/Lippincott Williams & Wilkins, Philadelphia, PA: 2018, 143-179.] ^[Physical Activity Guidelines Advisory Committee. Physical Activity Guidelines Advisory Committee Report, 2008. Washington, DC: U.S. Dept of Health and Human Services; 2008.], and shouldn't fall below 40 beats per minute. 
 Bellabeat should consider, if not yet available, to allow users to set warning criteria for when heartbeat exceeds certain preset beats per minutes.
