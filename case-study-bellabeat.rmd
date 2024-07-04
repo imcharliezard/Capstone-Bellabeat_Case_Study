@@ -1,0 +1,1903 @@
+# %% [code]
+---
+title: "Bellabeat Case Study in R"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_depth: 2
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+# Introduction
+
+This case study explores a data analysis project for a high-tech
+manufacturer of health-focused products for women, called
+[Bellabeat](https://bellabeat.com/). Playing the role of a junior
+marketing analyst with the company, I am tasked with analyzing data
+collected by one of the company's products, a wearble fitness/health
+tracker smart devices. The company's co-founder and Chief Creative
+Officer (CCO), Urška Sršen, believes that such analysis could unlock new
+growth opportunities for the company.
+
+Based on the analysis and the recommendation presented to the executive
+team, the marketing team will then create a new marketing strategy to
+unlock any potential growth for the company.
+
+In this project, we will go through the data analysis phases of:
+
+-   Ask
+-   Prepare
+-   Process
+-   Analyze
+-   Share
+
+For this project, I chose to use R, as I find it more challenging and
+versatile.
+
+# Ask
+
+## The Stakeholders
+
+-   Urška Sršen, co-founder and CPO
+-   Sando Mur, co-founder
+-   Marketing Analytics team
+
+## Three Questions
+
+There are three questions that will guide our analysis:
+
+1.  What are some trends in smart device usage?
+2.  How could these trends apply to Bellabeat customers?
+3.  How could these trends help influence Bellabeat's marketing
+    strategy?
+
+## The Business Task
+
+Find how Bellabeat's customers use the company's wearable smart device.
+
+# Prepare
+
+## The Data
+
+Srsen ecouraged us to use public data to explore smart device users'
+daily habits. She pointed us to a specific dataset, the [FitBit Fitness
+Tracker Data](https://kaggle.com/datasets/arashnic/fitbit), which is
+made available through [Mobius](https://kaggle.com/arashnic).
+
+The data contains personal fitness data from about 30 FitBit users.
+These users have consented to the submission of their personal tracker
+data, which includes information about activity intensity levels, steps,
+calories, heart rate, and sleep.
+
+### Data Credibility and/or Data Issues
+
+The data is not collected by Bellabeat, rather by an indirect
+competitor. Since Bellabeat focuses its products on women, there is no
+way for us to know whether the data we are working with was collected
+from women, as there is no personally identifiable data that reveals to
+us the genders of the participants. Additionally, due to the small
+sample size (only about 30 users) and time-frame (31 days), we have no
+idea whether it is a good representation of fitness/health tracker
+wearable device users.
+
+I will not be using all of the data files provided as some of them
+contain duplicate information. For example, the data in the *daily
+intensities* file, is also present as part of the data in the *daily
+activity* file.
+
+Further, I noticed some naming and formatting inconsistencies that could
+cause problems later on in the analysis - I will go through them and
+address them further down the process.
+
+## Install and Load Required R Packages
+
+Since we are using R for this project, there are several packages that
+we'll need to load. These packages contain many useful functions for
+cleaning, analyzing, and visualizing data.
+
+Let's begin by loading these R packages.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(tidyverse) # for data cleaning and organizing
+library(janitor) # for data clean up
+library(ggplot2) # for data visualization
+library(gganimate) # for data visualization animation
+library(knitr)
+library(gifski)
+library(plotly) # for data visualization
+library(scales) # for setting data scales in visualizations
+library(viridis) # for data visualization
+library(grid) # for data visualization
+library(gridExtra) # for data visualization
+library(reshape2) # for reshaping data
+```
+
+<br>
+
+Now, let's set some work environment options:
+
+```{r}
+options(dplyr.summarise.inform = FALSE)
+options(dplyr.summarise.warn = FALSE)
+```
+
+<br>
+
+## Upload Data
+
+As previously mentioned, the data is broken up by month and comes in 12
+separate CSV files. I'll upload all 12 files and create a data frame for
+each. I'll later join them all into one data frame.
+
+```{r, upload data files}
+daily_activity <- read.csv("/kaggle/input/fitbit/mturkfitbit_export_4.12.16-5.12.16/Fitabase Data 4.12.16-5.12.16/dailyActivity_merged.csv")
+daily_sleep <- read.csv("/kaggle/input/fitbit/mturkfitbit_export_4.12.16-5.12.16/Fitabase Data 4.12.16-5.12.16/sleepDay_merged.csv")
+hourly_calories <- read.csv("/kaggle/input/fitbit/mturkfitbit_export_4.12.16-5.12.16/Fitabase Data 4.12.16-5.12.16/hourlyCalories_merged.csv")
+hourly_intensities <- read.csv("/kaggle/input/fitbit/mturkfitbit_export_4.12.16-5.12.16/Fitabase Data 4.12.16-5.12.16/hourlyIntensities_merged.csv")
+hourly_steps <- read.csv("/kaggle/input/fitbit/mturkfitbit_export_4.12.16-5.12.16/Fitabase Data 4.12.16-5.12.16/hourlySteps_merged.csv")
+heart_rate <- read.csv("/kaggle/input/fitbit/mturkfitbit_export_4.12.16-5.12.16/Fitabase Data 4.12.16-5.12.16/heartrate_seconds_merged.csv")
+weight_log <- read.csv("/kaggle/input/fitbit/mturkfitbit_export_4.12.16-5.12.16/Fitabase Data 4.12.16-5.12.16/weightLogInfo_merged.csv")
+```
+
+<br>
+
+## Initial Inspection of Data
+
+### Get a "Glimpse" of the Data {.tabset .tabset-fade .tabset-pills}
+
+After uploading the files and creating data frames, let's check the date
+frames.
+
+#### daily_activity
+
+```{r}
+glimpse(daily_activity)
+```
+
+#### daily_sleep
+
+```{r}
+glimpse(daily_sleep)
+```
+
+#### hourly_calories
+
+```{r}
+glimpse(hourly_calories)
+```
+
+#### hourly_intensities
+
+```{r}
+glimpse(hourly_intensities)
+```
+
+#### hourly_steps
+
+```{r}
+glimpse(hourly_steps)
+```
+
+#### heart_rate
+
+```{r}
+glimpse(heart_rate)
+```
+
+#### weight_log
+
+```{r}
+glimpse(weight_log)
+```
+
+<br>
+
+### Find Distinct Users
+
+Let's verify the number of distinct users in the data. We know we should
+have around 30 distinct users.
+
+```{r, find n of distinct users}
+n_distinct(daily_activity$Id)
+n_distinct(daily_sleep$Id)
+n_distinct(hourly_calories$Id)
+n_distinct(hourly_intensities$Id)
+n_distinct(hourly_steps$Id)
+n_distinct(heart_rate$Id)
+n_distinct(weight_log$Id)
+```
+
+<br>
+
+We see that we have **33** unique users in the *daily_activity* and all
+of the hourly data frames, **24** unique users in the *daily_sleep* data
+frame, **14** unique users in the *heart_rate* data set, and **8**
+unique users in the *weight_log data* frame.
+
+### A few things to note:
+
+-   The *Id* variable is formatted as a number, however it should be
+    character
+
+-   Column names need to be cleaned up
+
+-   Some column names are inconsistent and should be renamed
+
+-   The date/time variable class is character and should be reformatted,
+    and a variable for the day of the week should be added
+
+-   Need to create a calculated variable and name the column
+    *total_active_minutes*, in the daily_activity data frame, for the
+    sum of all active minutes
+
+-   Need to create a calculated variable and name the column
+    *total_time_awake*, in the *daily_sleep* date frame, for the
+    difference between *total_time_in_bed* and *total_time_asleep*
+
+# Process
+
+## Cleaning and Preparing Data for Analysis
+
+### Reformat *Id* Variable Class
+
+Let's begin by reformatting the *Id* variable class from numeric to
+character:
+
+```{r, reformat Id variable class}
+daily_activity$Id <- as.character(daily_activity$Id)
+daily_sleep$Id <- as.character(daily_sleep$Id)
+hourly_calories$Id <- as.character(hourly_calories$Id)
+hourly_intensities$Id <- as.character(hourly_intensities$Id)
+hourly_steps$Id <- as.character(hourly_steps$Id)
+heart_rate$Id <- as.character(heart_rate$Id)
+weight_log$Id <- as.character(weight_log$Id)
+```
+
+### Clean-Up Column Names {.tabset .tabset-fade .tabset-pills}
+
+Next, we should clean-up the column names so they are consistent and
+easier to read:
+
+```{r}
+daily_activity <- clean_names(daily_activity)
+daily_sleep <- clean_names(daily_sleep)
+hourly_calories <- clean_names(hourly_calories)
+hourly_intensities <- clean_names(hourly_intensities)
+hourly_steps <- clean_names(hourly_steps)
+heart_rate <- clean_names(heart_rate)
+weight_log <- clean_names(weight_log)
+```
+
+We can check out the results of the clean-up:
+
+#### daily_activity
+
+```{r}
+colnames(daily_activity)
+```
+
+#### daily_activity
+
+```{r}
+colnames(daily_sleep)
+```
+
+#### hourly_calories
+
+```{r}
+colnames(hourly_calories)
+```
+
+#### hourly_intensities
+
+```{r}
+colnames(hourly_intensities)
+```
+
+#### hourly_steps
+
+```{r}
+colnames(hourly_steps)
+```
+
+#### heart_rate
+
+```{r}
+colnames(heart_rate)
+```
+
+#### weight_log
+
+```{r}
+colnames(weight_log)
+```
+
+<br>
+
+### Rename Columns {.tabset .tabset-fade .tabset-pills}
+
+There are a few columns that are inconsistently named, or have names
+that may cause us issues in certain operations down the line. Let's
+rename them:
+
+```{r, rename columns}
+# Rename columns for consistency
+
+# daily_activity
+daily_activity <- daily_activity %>% 
+  rename(activity_day = activity_date) %>% 
+  rename(lightly_active_distance = light_active_distance) %>% 
+  rename(moderately_active_minutes = fairly_active_minutes)
+
+# hourly_steps
+hourly_steps <- hourly_steps %>% 
+  rename(total_steps = step_total)
+
+# heart_rate
+heart_rate <- heart_rate %>% 
+  rename(capture_time = time)
+
+# weight_log
+weight_log <- weight_log %>% 
+  rename(log_date = date)
+```
+
+<br>
+
+Let's verify that the renaming was successful:
+
+#### daily_activity
+
+```{r}
+colnames(daily_activity)
+```
+
+#### hourly_steps
+
+```{r}
+colnames(hourly_steps)
+```
+
+#### heart_rate
+
+```{r}
+colnames(heart_rate)
+```
+
+#### weight_log
+
+```{r}
+colnames(weight_log)
+```
+
+### Reformat Date/Time Columns
+
+#### Date and Time
+
+Currently, the date variable class is *character*. This will cause some
+issues if in using it for our analyses. We can easily reclassify it;
+however, we should also put the date and time in separate columns. Let's
+use some lubridate() functions to do that:
+
+```{r, reformat date and time}
+# daily_activity
+daily_activity$activity_day = as.POSIXct(daily_activity$activity_day,
+                                         format = "%m/%d/%Y",
+                                         tz = Sys.timezone())
+daily_activity$date = as.Date(daily_activity$activity_day,
+                              format = "%m/%d/%Y")
+
+# daily_sleep
+daily_sleep$sleep_day = as.POSIXct(daily_sleep$sleep_day,
+                                   format = "%m/%d/%Y %I:%M:%S %p",
+                                   tz = Sys.timezone())
+daily_sleep$date = as.Date(daily_sleep$sleep_day,
+                           format = "%m/%d/%Y")
+daily_sleep$time = format(daily_sleep$sleep_day,
+                          format = "%H:%M:%S")
+
+# hourly_calories
+hourly_calories$activity_hour = as.POSIXct(hourly_calories$activity_hour,
+                                           format = "%m/%d/%Y %I:%M:%S %p",
+                                           tz = Sys.timezone())
+hourly_calories$date = as.Date(hourly_calories$activity_hour,
+                               format = "%m/%d/%Y")
+hourly_calories$time = format(hourly_calories$activity_hour,
+                              format = "%H:%M:%S")
+
+# hourly_intensities
+hourly_intensities$activity_hour = as.POSIXct(hourly_intensities$activity_hour,
+                                              format = "%m/%d/%Y %I:%M:%S %p",
+                                              tz = Sys.timezone())
+hourly_intensities$date = as.Date(hourly_intensities$activity_hour,
+                                  format = "%m/%d/%Y")
+hourly_intensities$time = format(hourly_intensities$activity_hour,
+                                 format = "%H:%M:%S")
+   
+# hourly_steps
+hourly_steps$activity_hour = as.POSIXct(hourly_steps$activity_hour,
+                                        format = "%m/%d/%Y %I:%M:%S %p",
+                                        tz = Sys.timezone())
+hourly_steps$date = as.Date(hourly_steps$activity_hour,
+                            format = "%m/%d/%Y")
+hourly_steps$time = format(hourly_steps$activity_hour,
+                           format = "%H:%M:%S")
+
+# heart_rate
+heart_rate$capture_time = as.POSIXct(heart_rate$capture_time,
+                                     format = "%m/%d/%Y %I:%M:%S %p",
+                                     tz = Sys.timezone())
+heart_rate$date = as.Date(heart_rate$capture_time,
+                          format = "%m/%d/%Y")
+heart_rate$time = format(heart_rate$capture_time,
+                         format = "%H:%M:%S")
+
+# weight_log
+weight_log$log_date = as.POSIXct(weight_log$log_date,
+                                 format = "%m/%d/%Y %I:%M:%S %p",
+                                 tz = Sys.timezone())
+weight_log$date = as.Date(weight_log$log_date,
+                          format = "%m/%d/%Y")
+weight_log$time = format(weight_log$log_date,
+                         format = "%H:%M:%S")
+```
+
+#### Day of the Week
+
+Now, that we have reformatted the date and time, we can add a weekday
+variable, so we can run some analyses by day of the week. We'll also set
+the proper order for our weekdays (Sun-Sat).
+
+```{r, create weekday variable}
+# Create weekday variable
+daily_activity$weekday = format(daily_activity$date,
+                                format = "%a")
+daily_sleep$weekday = format(daily_sleep$date,
+                             format = "%a")
+hourly_calories$weekday = format(hourly_calories$date,
+                                 format = "%a")
+hourly_intensities$weekday = format(hourly_intensities$date,
+                                    format = "%a")
+hourly_steps$weekday = format(hourly_steps$date,
+                              format = "%a")
+heart_rate$weekday = format(heart_rate$date,
+                            format = "%a")
+weight_log$weekday = format(weight_log$date,
+                            format = "%a")
+
+# Set weekday order
+daily_activity$weekday <- ordered(daily_activity$weekday,
+                                  levels = c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"))
+daily_sleep$weekday <- ordered(daily_sleep$weekday,
+                               levels = c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"))
+hourly_calories$weekday <- ordered(hourly_calories$weekday,
+                                   levels = c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"))
+hourly_intensities$weekday <- ordered(hourly_intensities$weekday,
+                                      levels = c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"))
+hourly_steps$weekday <- ordered(hourly_steps$weekday,
+                                levels = c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"))
+heart_rate$weekday<- ordered(heart_rate$weekday,
+                              levels = c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"))
+weight_log$weekday <- ordered(weight_log$weekday,
+                              levels = c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"))
+```
+
+### Create Calculated Columns
+
+Now we can created the calculated columns:
+
+```{r, create calculated columns}
+# total_active_minutes
+daily_activity$total_active_minutes <- c(daily_activity$lightly_active_minutes + 
+                                           daily_activity$moderately_active_minutes +
+                                           daily_activity$very_active_minutes)
+
+# total_time_awake
+daily_sleep$total_time_awake <- c(daily_sleep$total_time_in_bed - daily_sleep$total_minutes_asleep)
+```
+
+### Find and Remove Empty Rows and Columns
+
+When looking over the data in Excel, I didn't notice any empty rows or
+columns, but it wouldn't hurt to make sure and run the remove_empty()
+function on the data frames.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+daily_activity %>% 
+  remove_empty(c("rows", "cols"))
+daily_sleep %>% 
+  remove_empty(c("rows", "cols"))
+hourly_calories %>% 
+  remove_empty(c("rows", "cols"))
+hourly_intensities %>% 
+  remove_empty(c("rows", "cols"))
+hourly_steps %>% 
+  remove_empty(c("rows", "cols"))
+heart_rate %>% 
+  remove_empty(c("rows", "cols"))
+weight_log %>% 
+  remove_empty(c("rows", "cols"))
+```
+
+As anticipated, none were found.
+
+### Handling Duplicates
+
+#### Find Duplicates {.tabset .tabset-fade .tabset-pills}
+
+##### daily_activity
+
+```{r}
+get_dupes(daily_activity)
+```
+
+##### daily_sleep
+
+```{r}
+get_dupes(daily_sleep)
+```
+
+##### hourly_calories
+
+```{r}
+get_dupes(hourly_calories)
+```
+
+##### hourly_intensities
+
+```{r}
+get_dupes(hourly_intensities)
+```
+
+##### hourly_steps
+
+```{r}
+get_dupes(hourly_steps)
+```
+
+##### heart_rate
+
+```{r}
+get_dupes(heart_rate)
+```
+
+##### weight_log
+
+```{r}
+get_dupes(weight_log)
+```
+
+#### Remove Duplicates
+
+It turns out that there are three sets of duplicate observations in the
+daily_sleep data frame. Let's get rid of them by isolating them into a
+data frame and performing an anti_join() function on the original and
+isolating data frame. After that, we can remove the isolating data frame
+from the environment as it will be useless.
+
+```{r, remove duplicated}
+# Isolate duplicates in a new data frame
+daily_sleep_dupes <- get_dupes(daily_sleep)
+
+# Remove duplicates through anti_join()
+daily_sleep <- anti_join(daily_sleep, daily_sleep_dupes)
+
+# Delete isolating data frame from environment
+rm(daily_sleep_dupes)
+
+# Double-check the daily_sleep data frame for duplicates removal
+get_dupes(daily_sleep)
+```
+
+And there we have it, no more duplicates.
+
+### Merging Data Frames
+
+Before we move on, I think it would be useful if we join together the
+hourly data frames to one *hourly_activity* data frame. Since we have
+three hourly data frames, we'll have to join them in steps.
+
+Let's start by comparing the three data frames' columns so we can see
+our join keys:
+
+```{r, compare data frames}
+# Compare columns of the 3 data frames
+compare_df_cols(hourly_calories,
+                hourly_intensities,
+                hourly_steps)
+```
+
+We can see that we have several join keys:
+
+-   id
+-   activity_hour
+-   date
+-   time
+-   weekday
+
+Let's proceed with the merging.
+
+```{r, merge data frames}
+# Join (full) hourly_calories with hourly_intensities
+hourly_calories_intensities_merged <- full_join(hourly_calories, hourly_intensities,
+                             by = c("id", "activity_hour", "date", "time", "weekday"))
+# Join (full) the 3 data frames
+hourly_activity <- full_join(hourly_calories_intensities_merged, hourly_steps,
+                             by = c("id", "activity_hour", "date", "time", "weekday"))
+# Remove unneeded data frames from environment
+rm(hourly_calories_intensities_merged)
+```
+
+Let's get a quick preview of the new *hourly_activity* data frame.
+
+```{r}
+head(hourly_activity, 10)
+```
+
+This concludes the **Process** phase. We can now continue to the
+**Analyze** phase for some analysis and visualization of our data.
+
+# Analyze
+
+## Descriptive Analysis {.tabset .tabset-fade .tabset-pills}
+
+Let's start the analysis phase by running a quick descriptive analysis
+on the data frames:
+
+### daily_activity
+
+```{r}
+daily_activity %>% 
+select(total_steps, total_distance, tracker_distance,  logged_activities_distance,
+       very_active_distance, moderately_active_distance, sedentary_active_distance,
+       very_active_minutes, moderately_active_minutes, lightly_active_minutes, total_active_minutes,
+       calories) %>% 
+  summary()
+```
+
+### daily_sleep
+
+```{r}
+daily_sleep %>% 
+  select(total_sleep_records,
+         total_time_in_bed,
+         total_minutes_asleep,
+         total_time_awake) %>% 
+  summary()
+```
+
+### hourly_activity
+
+```{r}
+hourly_activity %>% 
+  select(calories,
+         total_intensity,
+         average_intensity,
+         total_steps) %>% 
+  summary()
+```
+
+### heart_rate
+
+```{r}
+heart_rate %>% 
+  select(value) %>% 
+  summary()
+```
+
+### weight_log
+
+```{r}
+weight_log %>% 
+  select(weight_kg,
+         weight_pounds,
+         fat,
+         bmi) %>% 
+  summary()
+```
+
+## Unique Record Numbers
+
+Participants use smart devices to record daily activity the most. 33 of
+the participants logged daily activity 24 of the participants recorded
+sleep 8 of the participants recorded their weight It is most common for
+participants to use fitness trackers to record daily activity. However,
+participants do not always record their daily sleep and weight.
+
+This could be due to lack of comfort to sleep with their fitness
+trackers at night and therefore taking them off before getting in bed.
+Consider reviewing the design of fitness tracker to make it more
+comfortable.
+
+```{r, unique record counts, out.width="100%"}
+# Unique record counts
+record_type <- c("Daily Activity","Daily Sleep",
+                 "Hourly Activity",
+                 "Heart Rate",
+                 "Weight Log")
+record_num <- c(n_distinct(daily_activity$id),
+                n_distinct(daily_sleep$id), 
+                n_distinct(hourly_activity$id),
+                n_distinct(heart_rate$id),
+                n_distinct(weight_log$id))
+record_count <- data.frame(record_type,
+                           record_num)
+
+# Plot unique record counts per type
+record_count_p <- ggplot(record_count,
+                         mapping = aes(x = reorder(record_type,
+                                                   desc(record_num)),
+                                       y = record_num,
+                                       fill = record_type)) +
+  geom_col(position = "dodge") +
+  geom_label(aes(label = record_num),
+             fill = "white",
+             colour = "black",
+             vjust = 0.5) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 8)) +
+  scale_fill_viridis_d() +
+  labs(title = "Unique Records by Type",
+       x = "Record Type",
+       y = "Number of Records",
+       caption = "Data by FitBit Fitness Tracker") +
+  theme_minimal() +
+  theme(legend.position="none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+
+record_count_p
+```
+
+**We can observe a couple of things:**
+
+1.  Fewer users record sleep data (73% of users)
+2.  Even fewer users recorded their heart rate data (42% of users)
+3.  Even *fewer yet* users recorded data in the weight log (24% of
+    users)
+
+There are a couple of reasons why the participation rate is lower in
+sleep and weight data.
+
+-   In order for sleep data to be captures, user must wear their devices
+    while sleeping. Some may find it uncomfortable or prefer to sleep
+    without electronics around them; however, we cannot know this for
+    certain.
+
+-   The sample size of the weight data is very small, so any significant
+    analysis cannot be accurately made on the data. However, the data
+    does provide a bullean variable for whether data was automatically
+    recorded by the device or whether it was manually recorded by the
+    user. This may shed light on why participation is so much lower.
+
+Let's explore that:
+
+```{r, out.width="100%"}
+# Weight log participation
+input_method <- c("Manual","Auto")
+input_type <- c(length(which(weight_log$is_manual_report == "True")),
+                length(which(weight_log$is_manual_report == "False")))
+manual_auto_input <- data.frame(input_method,input_type)
+
+# Plot the input method counts
+log_input_type_p <-
+  ggplot(manual_auto_input,
+         mapping = aes(x = reorder(input_method, desc(input_type)),
+                       y = input_type,
+                       fill = input_method)) +
+  geom_col(position = "dodge") +
+  geom_label(aes(label = input_type),
+             fill = "white",
+             colour = "black",
+             vjust = 0.5) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 8)) +
+  scale_fill_viridis_d() +
+  labs(title = "Weight Log Input Methods",
+       x = "Type of Input",
+       y = "Number of Inputs",
+       caption = "Data by FitBit Fitness Tracker") +
+  theme_minimal() +
+  theme(legend.position="none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+
+log_input_type_p
+```
+
+We can see that there are many more *manual* inputs. This can signify
+that users either forget or don't want to take the time to manually
+record their weight information, as generally it requires getting on a
+scale.
+
+## Calorie Analysis
+
+### Daily Calories vs. Daily Total Steps
+
+```{r, out.width="100%"}
+daily_activity %>% 
+  group_by(total_steps,
+           calories) %>% 
+  ggplot(aes(x = total_steps,
+             y = calories)) +
+  geom_jitter(color = "#22A884FF") +
+  geom_smooth(method = "loess",
+              formula = "y ~ x",
+              color = "#474487FF") +
+  scale_y_continuous(labels = comma) +
+  scale_x_continuous(labels = comma) +
+  labs(title = "Total Daily Steps vs. Daily Calories",
+       y = "Calories",
+       x = "Total Steps",
+       caption = 'Data Source: FitBit Fitness Tracker Data') +
+  theme_minimal() +
+  theme(text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+```
+
+We can see a clear positive relationship between daily steps and daily
+calories. Although it may seem obvious that more steps would mean more
+calories burned, the relationship may not be as linear. We run a
+correlation test using the [Pearson
+method](https://www.phdata.io/blog/data-science-stats-review/):
+
+```{r, correlation test}
+cor.test(daily_activity$total_steps, daily_activity$calories, method = 'pearson', conf.level = 0.95)
+```
+
+With a confidence level of 95%, the correlation between the daily
+*total_steps* and daily *calories* is almost 0.59, which means there is
+a decent relationship between the variables.
+
+We can run the same analysis on the relationship between *hourly* steps
+and calories.
+
+### Hourly Calories vs. Daily Total Steps
+
+```{r, out.width="100%"}
+hourly_activity %>% 
+  group_by(total_steps,
+           calories) %>% 
+  ggplot(aes(x = total_steps,
+             y = calories)) +
+  geom_jitter(color = "#22A884FF") +
+  geom_smooth(method = "loess",
+              formula = "y ~ x",
+              color = "#474487FF") +
+  scale_y_continuous(labels = comma) +
+  scale_x_continuous(labels = comma) +
+  labs(title = "Total Hourly Steps vs. Hourly Calories",
+       y = "Calories",
+       x = "Total Steps",
+       caption = 'Data Source: FitBit Fitness Tracker Data') +
+  theme_minimal() +
+  theme(text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+```
+
+Lets run the same correlation test on this data as well:
+
+```{r}
+cor.test(hourly_activity$total_steps, hourly_activity$calories, method = 'pearson', conf.level = 0.95)
+```
+
+This time, with a confidence level of 95%, the correlation between the
+hourly *total_steps* and hourly *calories* is much higher, at 0.81,
+which means there is even a stronger relationship between the variables.
+
+## Activity and Intensity Analysis
+
+### Daily Activity 
+
+Let's take a look at user activity during a week.
+
+#### Steps and Distance by Day of the Week
+
+We'll visualize the total steps taken in each day of the week, as well
+as the total distance for each day of the week. Those are totals for all
+users, just so we get a sense for which days are more active.
+
+```{r, out.width="100%"}
+steps_weekday <- daily_activity %>% 
+  group_by(weekday) %>% 
+  ggplot(daily_activity,
+         mapping = aes(x = weekday,
+                       y = total_steps,
+                       fill = weekday)) +
+  geom_col() +
+  scale_y_continuous(labels = comma) +
+  scale_fill_viridis_d() +
+  labs(title = "Total Steps by Day of the Week",
+       x = NULL,
+       y = "Total Steps",
+       caption = "Data by FitBit Fitness Tracker") +
+  theme_minimal() +
+  theme(legend.position="none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0))
+
+# Total Distance per Week Day
+distance_weekday <- daily_activity %>% 
+  group_by(weekday) %>% 
+  ggplot(daily_activity,
+         mapping = aes(x = weekday,
+                       y = total_distance,
+                       fill = weekday)) +
+  geom_col() +
+  scale_y_continuous(labels = comma) +
+  scale_fill_viridis_d() +
+  labs(title = "Total Distance by Day of the Week",
+       x = NULL,
+       y = "Total Distance (miles)") +
+  theme_minimal() +
+  theme(legend.position="none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0))
+
+grid.arrange(steps_weekday,
+             distance_weekday, ncol = 3,
+             widths = c(5,0.5,5),
+             layout_matrix = rbind(c(1, NA, 2)),
+             bottom = textGrob("Data by FitBit Fitness Tracker",
+                            x = 1, y = 0.5,
+                            just = "right",
+                            gp = gpar(fontsize = 10)))
+```
+
+We can see that the middle of the week (Tue-Thu) seems to be most active
+in terms of *steps* and *distance*, with Tuesday being the most active
+day.
+
+#### Total Active Time by Day of the Week
+
+Now, let's take a look at the total active time by each day of the week.
+
+```{r, out.width="100%"}
+active_time_weekday <- daily_activity %>% 
+  group_by(weekday) %>% 
+  ggplot(daily_activity,
+         mapping = aes(x = weekday,
+                       y = (total_active_minutes)/60,
+                       fill = weekday)) +
+  geom_col() +
+  scale_y_continuous(labels = comma) +
+  scale_fill_viridis_d() +
+  labs(title = "Total Active Minutes by Day of the Week",
+       x = NULL,
+       y = "Total Active Time (hours)",
+       caption = "Data by FitBit Fitness Tracker") +
+  theme_minimal() +
+  theme(legend.position="none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+
+active_time_weekday
+```
+
+Now we can see that in terms of *time* the middle of the week (Tue-Thu)
+is still most active but the gaps between the days is much smaller. This
+can lead us to believe that users may be engaging in other activities
+(such as calisthenics) that do not count for steps and/or distance.
+
+Finally, Let's look at sedentary time during a week:
+
+```{r, out.width="100%"}
+sedentary_time_weekday <- daily_activity %>% 
+  group_by(weekday) %>% 
+  ggplot(daily_activity,
+         mapping = aes(x = weekday,
+                       y = sedentary_minutes,
+                       fill = weekday)) +
+  geom_col() +
+  scale_y_continuous(labels = comma) +
+  scale_fill_viridis_d() +
+  labs(title = "Total Sedentary Minutes by Day of the Week",
+       x = NULL,
+       y = "Total Sedentary Time (minutes)",
+       caption = "Data by FitBit Fitness Tracker") +
+  theme_minimal() +
+  theme(legend.position="none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0))
+
+sedentary_time_weekday
+```
+
+##### Some observations
+
+* We can see that Tuesday seems to be the most active day of the week.
+  Activity sharply increases between Monday and Tuesday and then
+  tapers down until Friday. There is an increase of activity on
+  Saturdays, however it is still lower that Tuesday-Thursday.
+
+* It is surprising to see that rather than weekends (Sat-Sun), the
+  middle of the week seems to be a lot more active.
+
+* We can also see that there is a similar patterns when it comes to
+  sedentary time, possibly due to most participants having jobs which
+  cause them to be much more sedentary during the week.
+
+### Activity Intensities
+
+#### Intensity by Distance
+
+```{r, out.width="100%"}
+daily_activity %>% 
+  select(lightly_active_distance,
+         moderately_active_distance,
+         very_active_distance) %>% 
+  summarise(across(everything(), list(sum))) %>% 
+  gather(activities, value) %>% 
+  mutate(ratio = value / sum(value),
+         label = percent(ratio %>% 
+                           round(4))) %>% 
+  mutate(activities = factor(activities,
+                             labels = c("Light",
+                                        "Moderate",
+                                        "Heavy"))) %>% 
+  ggplot(aes(x = activities,
+             y = value,
+             label = label,
+             fill = activities)) +
+  geom_col() +
+  geom_label(aes(label = label),
+            color = "black",
+            fill = "white",
+            vjust = 0.5) +
+  scale_y_continuous(labels = comma) +
+  scale_fill_manual(values = c("#FDE725FF",
+                               "#21908Cff",
+                               "#440154FF"),
+                    labels = c("Light",
+                               "Moderate",
+                               "Heavy")) +
+  labs(title = "Intensity Level by Distance",
+       x = "Intensity Level",
+       y = "Distance (miles)",
+       fill = "Intensity Level",
+       caption = "Data by FitBit Fitness Tracker") +
+  theme_light() +
+  theme(legend.position="none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+```
+
+We can see that the most common (62%) of active distance was **lightly
+active**.
+
+#### Intensity by Time
+
+We can take the same approach to visualize the intensity levels by
+time(hours):
+
+```{r, out.width="100%"}
+daily_activity %>% 
+  select(lightly_active_minutes,
+         moderately_active_minutes,
+         very_active_minutes) %>% 
+  summarise(across(everything(), list(sum))) %>% 
+  gather(activities, value) %>% 
+  mutate(ratio = value / sum(value),
+         label = percent(ratio %>% 
+                           round(4))) %>% 
+  mutate(activities = factor(activities,
+                             labels = c("Light",
+                                        "Moderate",
+                                        "Heavy"))) %>% 
+  ggplot(aes(x = activities,
+             y = value/60,
+             label = label,
+             fill = activities)) +
+  geom_col() +
+  geom_label(aes(label = label),
+            color = "black",
+            fill = "white",
+            vjust = 0.5) +
+  scale_y_continuous(labels = comma) +
+  scale_fill_manual(values = c("#FDE725FF",
+                               "#21908Cff",
+                               "#440154FF"),
+                    labels = c("Light",
+                               "Moderate",
+                               "Heavy")) +
+  labs(title = "Intensity Level by Distance",
+       x = "Intensity Level",
+       y = "Time (hours)",
+       fill = "Intensity Level",
+       caption = "Data by FitBit Fitness Tracker") +
+  theme_light() +
+  theme(legend.position="none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+```
+
+Again, we see that **light** intensity dominates.
+
+#### Activity Intensity Break-Down 
+
+Let's take a look into the activity intensities and get a sense of the
+level of intensity our users group mostly in. Our data records three
+levels of intensity: *Lightly Active*, *Moderately Active*, and *Very
+Active* - and, of course, *sedentary*. Let's see how this is
+distributed.
+
+```{r, out.width="100%"}
+# Create data frame for mean active minutes for each activity intensity
+daily_int_levels <- data.frame(intensity_level = c("Sedentary",
+                                                   "Lightly Active",
+                                                   "Moderately Active",
+                                                   "Very Active"),
+                               mean_active_minutes = c(mean(daily_activity$sedentary_minutes),
+                                                       mean(daily_activity$lightly_active_minutes),
+                                                       mean(daily_activity$moderately_active_minutes),
+                                                       mean(daily_activity$very_active_minutes)))
+daily_int_levels$percentage = c((daily_int_levels$mean_active_minutes / sum(daily_int_levels$mean_active_minutes)) * 100)
+
+# Activity Intensity Distribution pie chart
+int_level_dist <- plot_ly(daily_int_levels,
+                          labels = ~intensity_level,
+                          values = ~percentage,
+                          type = "pie",
+                          sort = FALSE,
+                          textposition = "outside",
+                          textinfo = "percent",
+                          outsidetextfont = list(color = "black"),
+                          insidetextfont = list(color = "black"),
+                          hoverinfo = 'percent+text',
+                          text = ~paste("", round(mean_active_minutes, 2), "minutes"),
+                          marker = list(colors = c("#FDE725FF",
+                               "#35B779FF",
+                               "#2C728EFF",
+                               "#414487FF"),
+                               line = list(color = "white", width = 1)),
+                          showlegend = TRUE,
+                          legendgrouptitle = list(text = "Activity Intensity"))
+int_level_dist <- int_level_dist %>%
+  layout(title = list(text = "Daily Activity Intensity (by minutes) Distribution",
+                      size = 12),
+         xaxis = list(showgrid = FALSE,
+                      zeroline = FALSE,
+                      showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE,
+                      zeroline = FALSE,
+                      showticklabels = FALSE))
+
+int_level_dist <- int_level_dist %>% 
+  add_annotations(text = "Data by FitBit Fitness Tracker",
+                           visible = TRUE,
+                           align = "right",
+                           valign = "bottom",
+                           size = 10,
+                           showarrow = FALSE,
+                           x = 1,
+                           y = 0)
+
+int_level_dist
+  
+```
+
+We can see that the vast majority is *Sedentary*, at 81.3%. This means
+that on a average, users spend about 991 minutes (or 16.5 hours) of
+their day being sedentary - and only about 3 hours on average being
+lightly active. the sedentary numbers are very high considering that
+average workdays are only eight hours long.
+
+This data can be broken down even further, and we'll do just that
+further down the analysis.
+
+### Hourly Activity and Intensity
+
+We can take a look at how activity, both steps and intensity.
+
+Let's start by visualizing how average steps are distributed through a
+day.
+
+```{r, out.width="100%"}
+hourly_activity %>% 
+  group_by(time) %>% 
+  drop_na() %>% 
+  summarise(mean_total_steps = mean(total_steps)) %>% 
+  ggplot(aes(x = time,
+             y = mean_total_steps)) +
+  geom_histogram(stat = "identity", fill = "#440154FF") +
+  labs(title = "Average Steps by Hour of the Day",
+       caption = 'Data by FitBit Fitness Tracker',
+       y = "Steps",
+       x = NULL) +
+  theme_light() +
+  theme(legend.position = "none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+Let's look at how average intensity is distributed throughout a day.
+
+```{r, out.width="100%"}
+hourly_activity %>% 
+  group_by(time) %>% 
+  drop_na() %>% 
+  summarise(mean_total_intensity = mean(total_intensity)) %>% 
+  ggplot(aes(x = time,
+             y = mean_total_intensity)) +
+  geom_histogram(stat = "identity", fill = "#440154FF") +
+  labs(title = "Average Intensity by Hour of the Day",
+       caption = 'Data by FitBit Fitness Tracker',
+       y = "Average Intensity (minutes)",
+       x = NULL) +
+  theme_light() +
+  theme(legend.position = "none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+We can see that the two charts corroborate one another: on both charts there are similar peaks in activity intensities and steps. The smaller peak is around lunchtime, 12pm through 2pm, and the higher peak is between 5pm though 7pm.
+
+This suggests that users are exercising during their lunch break or right after work.
+
+#### Hourly Heart Rate Averages
+
+```{r, message = FALSE, warning = FALSE, results = FALSE, out.width="100%"}
+# Get hourly heart rate averages
+hr_hourly_means = aggregate(heart_rate["value"],
+            format(heart_rate["capture_time"], "%H"),
+            mean,
+            na.rm = TRUE)
+
+# Reformat "capture_time" variable to character
+hr_hourly_means$capture_time <- as.numeric(hr_hourly_means$capture_time)
+
+# Plot the hourly heart rate means
+hr_hourly_means_p <- ggplot(hr_hourly_means,
+       aes(x = capture_time,
+           y = value),
+       group = 1) +
+  geom_line(size = 1, color = "#440154FF") +
+  geom_point(size = 1, color = "#FDE725FF") +
+  scale_x_continuous(breaks = pretty_breaks(18)) +
+  scale_y_continuous(breaks = pretty_breaks(10)) +
+  labs(title = "Average Heart Rate by 24-Hour Period",
+       caption = 'Data by FitBit Fitness Tracker',
+       y = "Average Heart Rate",
+       x = "Time of Day (hours)") +
+  theme_light() +
+  theme(legend.position = "none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  transition_reveal(capture_time)
+
+animate(hr_hourly_means_p,
+        renderer = gifski_renderer(loop = TRUE),
+        res = 300)
+
+anim_save("hr_hourly_means_p.gif", hr_hourly_means_p)
+```
+
+![](hr_hourly_means_p.gif){width=100%}
+
+When we look at average heart rate by hour of the day, we see the same pattern with similar peaks in heart rate during the periods of 12-2pm and 5-7pm.
+
+### User Activity Breakdown
+
+As mentioned, we can get a more detailed look into our data by creating
+user categories based on average activity levels. We'll create four user
+categories (or types):
+
+-   *Sedentary* users
+-   *Lightly Active* users
+-   *Moderately* users
+-   *Very Active* users
+
+```{r}
+user_activity_cats <- daily_activity %>% 
+  summarise(user_category = factor(case_when(sedentary_minutes > mean(sedentary_minutes) &
+                                               lightly_active_minutes < mean(lightly_active_minutes) &
+                                               moderately_active_minutes < mean(moderately_active_minutes) &
+                                               very_active_minutes < mean(very_active_minutes) ~ "Sedentary",
+                                             sedentary_minutes < mean(sedentary_minutes) &
+                                               lightly_active_minutes > mean(lightly_active_minutes) &
+                                               moderately_active_minutes < mean(moderately_active_minutes) &
+                                               very_active_minutes < mean(very_active_minutes) ~ "Lightly Active",
+                                             sedentary_minutes < mean(sedentary_minutes) &
+                                               lightly_active_minutes < mean(lightly_active_minutes) &
+                                               moderately_active_minutes > mean(moderately_active_minutes) &
+                                               very_active_minutes < mean(very_active_minutes) ~ "Moderately Active",
+                                             sedentary_minutes < mean(sedentary_minutes) &
+                                               lightly_active_minutes < mean(lightly_active_minutes) &
+                                               moderately_active_minutes < mean(moderately_active_minutes) &
+                                               very_active_minutes > mean(very_active_minutes) ~ "Very Active"),
+                                   levels = c("Sedentary",
+                                       "Lightly Active",
+                                       "Moderately Active",
+                                       "Very Active")),
+            calories) %>% 
+  drop_na()
+```
+
+Let's now visualize the distribution of these user types in a pie chart:
+
+```{r, out.width="100%"}
+user_activity_cats_prcnt <- user_activity_cats %>% 
+  group_by(user_category) %>% 
+  summarise(total = n()) %>% 
+  mutate(totals = sum(total)) %>% 
+  group_by(user_category) %>% 
+  summarise(total_percent = total / totals)
+
+user_activity_cats_p <- plot_ly(user_activity_cats_prcnt,
+        labels = ~user_category,
+        values = ~total_percent,
+        type = "pie",
+        sort = FALSE,
+        textposition = "outside",
+        textinfo = "percent",
+        outsidetextfont = list(color = "black"),
+        insidetextfont = list(color = "black"),
+        hoverinfo = "percent",
+        marker = list(colors = c("#FDE725FF",
+                                 "#35B779FF",
+                                 "#2C728EFF",
+                                 "#414487FF"),
+                               line = list(color = "white", width = 1)),
+                          showlegend = TRUE,
+                          legendgrouptitle = list(text = "User Categories"))
+user_activity_cats_p <- user_activity_cats_p %>%
+  layout(title = list(text = "User Category Distribution",
+                      size = 12),
+         xaxis = list(showgrid = FALSE,
+                      zeroline = FALSE,
+                      showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE,
+                      zeroline = FALSE,
+                      showticklabels = FALSE))
+
+user_activity_cats_p <- user_activity_cats_p %>% 
+  add_annotations(text = "Data by FitBit Fitness Tracker",
+                           visible = TRUE,
+                           align = "right",
+                           valign = "bottom",
+                           size = 10,
+                           showarrow = FALSE,
+                           x = 1,
+                           y = 0)
+
+user_activity_cats_p
+```
+
+This gives us a different perspective. The previous chart gave us an
+idea of how much time is spent on each activity level. This chart gives
+us an idea as to the number of users that classify into each of these
+activity categories.
+
+**We can see that over half the users have an above average sedentary
+time!** And that about a third are *lightly active*.
+
+#### Calories by User Category
+
+We should now see how calorie burn is divided among the four user
+categories:
+
+```{r, calories by user category, out.width="100%"}
+cal_user_cat <- ggplot(user_activity_cats,
+                       aes(x = user_category,
+                           y = calories,
+                           fill = user_category)) +
+  geom_boxplot() +
+  scale_y_continuous(labels = comma) +
+  scale_fill_manual(values = c("#FDE725FF",
+                               "#35B779FF",
+                               "#2C728EFF",
+                               "#414487FF")) +
+  theme(legend.position="none") +
+  labs(title="Calories Burned by User Category",
+       x=NULL,
+       y = "Calories",
+       caption = "Data by FitBit Fitness Tracker") +
+  theme_minimal() +
+  theme(legend.position="none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+
+cal_user_cat
+```
+
+This shows us a different picture. We can see that even though
+*sedentary* and *lightly active* users make up **almost 90%** of all
+users, the *very active* users burn the most calories, well above all
+the other users, and nearly double that of sedentary users.
+
+#### Calories by Daily Steps and Distance
+
+We can now break down the calories burn in a day by the total steps and
+distance covered by users.
+
+```{r, out.width="100%"}
+cal_step_distance <- daily_activity %>%
+  summarise(distance = factor(case_when(total_distance < 2 ~ "< 2 mi",
+                                        total_distance >= 2 & total_distance <= 7 ~ "2 > & < 5 mi",
+                                        total_distance > 5 ~ "> 5 mi"),
+                              levels = c("> 5 mi","2 > & < 5 mi","< 2 mi")),
+            steps = factor(case_when(total_steps < 5000 ~ "< 5k steps",
+                                     total_steps >= 5000 & total_steps <= 10000 ~ "5k > & < 10k Steps",
+                                     total_steps > 10000 ~ "> 10k Steps"),
+                           levels = c("> 10k Steps","5k > & < 10k Steps","< 5k steps")), calories) %>%
+  ggplot(aes(x = steps, y = calories, fill = steps)) +
+  geom_boxplot() +
+  scale_y_continuous(labels = comma) +
+  scale_fill_manual(values = c("#FDE725FF",
+                               "#21908Cff",
+                               "#440154FF")) +
+  facet_wrap(~distance) +
+  labs(title = "Calories Burned by Steps and Distance",
+       x = NULL,
+       y = "Calories",
+       caption = "Data by FitBit Fitness Tracker") +
+  theme_light() +
+  theme(legend.position = "none",
+        text = element_text(size = 8),
+        plot.title = element_text(hjust = 0.5))
+
+cal_step_distance
+```
+
+This plot represents the calories burned by three categories of steps
+based on the summary values of:
+
+-   Less than 5,000 steps
+-   Between 5,000 and 10,000 steps
+-   More than 10,000 steps
+
+And then faceted by three categories of distance:
+
+-   Less than 2 miles
+-   Between 2 and 5 miles
+-   Longer than 5 miles
+
+The numbers were picked based on international averages for *women*
+specifically.
+
+We can see that the most calories burned are in the 5-10,000 steps range
+*and* greater than 5-mile distance, which would indicate some kind of
+higher intensity activity, like speed walking/jogging/running, that
+allows a user to cover more distance with less steps.
+
+## Sleep Analysis
+
+### Sleep Time Distribution
+
+```{r, out.width="100%"}
+daily_sleep %>% 
+  select(total_minutes_asleep) %>% 
+  drop_na() %>% 
+  mutate(sleep_level = ifelse(total_minutes_asleep <= 360, "Less than 6 hours",
+                         ifelse(total_minutes_asleep <= 480, "6 to 8 hours",
+                                "Over 8 hours"))) %>% 
+  mutate(sleep_level = factor(sleep_level,
+                                levels = c("Less than 6 hours",
+                                           "6 to 8 hours",
+                                           "Over 8 hours"))) %>% 
+  ggplot(aes(x = total_minutes_asleep,
+             fill = sleep_level)) +
+  geom_histogram(position = 'dodge',
+                 bins = 31) +
+  scale_x_continuous(breaks = pretty_breaks(n = 15)) +
+  scale_fill_manual(values = c("#FDE725FF",
+                               "#35B779FF",
+                               "#31688EFF")) +
+  labs(title = "Sleep Time Distribution",
+       x = "Sleep Time (in minutes)",
+       y = "Count",
+       fill = "Sleep Level",
+       caption = "Data by FitBit Fitness Tracker") +
+  annotate("rect", xmin = 325, xmax = 525, ymax = 50, ymin = 0, fill = "#440154FF", alpha = 0.1) +
+  theme_light() +
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+```
+
+We can see that the majority of users sleep approximately 325 to 525
+minutes (5.4 to 8.75 hours) per day.
+
+### Distance and Sleep Quality by User
+
+```{r, out.width="100%"}
+# Join (full) daily_activity with daily_sleep
+daily_act_sleep <- full_join(daily_activity, daily_sleep,
+                             by = c("id", "date", "weekday"))
+
+daily_act_sleep %>% 
+  select(id, total_distance, total_minutes_asleep) %>% 
+  group_by(id) %>% 
+  summarise_all(list(~mean(., na.rm=TRUE))) %>% 
+  drop_na() %>% 
+  mutate(id = factor(id)) %>% 
+  ggplot() +
+  geom_bar(aes(x = id,
+               y = total_distance),
+           stat = "identity",
+           fill = "#21908Cff",
+           alpha = 0.5) +
+  geom_point(aes(x = id,
+                 y = total_minutes_asleep/60),
+             color = "#440154FF") +
+  geom_segment(aes(x = id,
+                   xend = id,
+                   y = 0,
+                   yend = total_minutes_asleep/60),
+               color = "#440154FF",
+               group = 1) +
+  scale_y_continuous(name = "Total Distance (miles)",
+                     breaks = pretty_breaks(n = 6),
+                     sec.axis = sec_axis(~.*60, name = "Sleep Time (minutes)", breaks = pretty_breaks(n = 6))) +
+  labs(title = "Average Daily Distance vs. Average Daily Sleep",
+       subtitle = "By User",
+       x = "User ID's",
+       caption = 'Data by FitBit Fitness Tracker') +
+  theme_light() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.y.left = element_text(color = "#21908Cff"), 
+        axis.ticks.y.left = element_line(color = "#21908Cff"),
+        axis.text.y.left = element_text(color = "#21908Cff"),
+        axis.title.y.right = element_text(color = "#440154FF"), 
+        axis.ticks.y.right = element_line(color = "#440154FF"),
+        axis.text.y.right = element_text(color = "#440154FF"),
+        legend.position = "none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+```
+
+We can see that covering a greater distance (on average, daily) doesn’t
+necessarily mean that the user will experience a longer sleep periods
+(on average, daily).
+
+### Sleep Level by Daily Steps
+
+We could reinforce our last assertion by looking into the average daily
+sleep period lengths versus the average number of daily steps.
+
+```{r, out.width="100%"}
+daily_act_sleep %>%
+  select(total_minutes_asleep, total_steps) %>%
+  summarise(sleep_level = factor(case_when(total_minutes_asleep < 360 ~ "Under 6 hours",
+                                           total_minutes_asleep >= 360 & total_minutes_asleep <= 480 ~ "6 to 8 hours",
+                                           total_minutes_asleep > 480 ~ "Over 8 hours"),
+                                 levels = c("Under 6 hours",
+                                            "6 to 8 hours",
+                                            "Over 8 hours")),
+            step_level = factor(case_when(total_steps < 2500 ~ "Under 2.5k Steps",
+                                          total_steps >= 2500 & total_steps <= 5000 ~ "2.5k to 5k Steps",
+                                          total_steps >= 5000 & total_steps <= 10000 ~ "5k to 10k Steps",
+                                          total_steps >= 10000 & total_steps <= 12500 ~ "10k to 12.5k Steps",
+                                          total_steps > 12500 ~ "Over 12.5k Steps"),
+                                levels = c("Under 2.5k Steps",
+                                           "2.5k to 5k Steps",
+                                           "5k to 10k Steps",
+                                           "10k to 12.5k Steps",
+                                           "Over 12.5k Steps"))) %>%
+  drop_na() %>%
+  group_by(sleep_level) %>% 
+  summarise(counts = n(), step_level) %>% 
+  ggplot(aes(sleep_level,
+             y = counts,
+             fill = sleep_level)) +
+  geom_col() +
+  scale_y_continuous(labels = comma,
+                     breaks = pretty_breaks(n = 6)) +
+  scale_fill_viridis(discrete = TRUE,
+                     option = "D") +
+  facet_wrap(~step_level, nrow = 1) +
+  labs(title = "Sleep Level by Daily Step Average Ranges",
+       caption = 'Data by FitBit Fitness Tracker',
+       y = "Counts",
+       x = NULL,
+       fill = "Sleep Level") +
+  theme_light() +
+  theme(legend.position = "bottom",
+        axis.text.x=element_blank(),
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+```
+
+There seems to be a "sweet spot" in terms of the optimum sleep level of
+6 to 8 hours a day in the range of 5,000 to 10,000 daily steps. It's
+also somewhat surprising to see that there is a relative increase in
+under-sleeping as there is an increase is daily steps.
+
+### Activity in Relation to Sleep Difficulties
+
+Let's see how the time spent in bed awake is affected by a user's
+activity during the day:
+
+```{r, out.width="100%"}
+daily_act_sleep %>% 
+  select(id, total_time_awake, total_steps) %>% 
+  group_by(id) %>% 
+  summarise_all(list(~mean(., na.rm=TRUE))) %>% 
+  drop_na() %>% 
+  mutate(id = factor(id)) %>% 
+  ggplot() +
+  geom_point(aes(x = total_steps/1000,
+                 y = total_time_awake,
+                 color = id)) +
+  scale_y_continuous(labels = comma,
+                     breaks = pretty_breaks(n = 8)) +
+  scale_x_continuous(breaks = pretty_breaks(6)) +
+  scale_color_viridis_d() +
+  labs(title = "Time Awake vs. Daily Steps",
+       caption = 'Data by FitBit Fitness Tracker',
+       y = "Time Awake",
+       x = "Daily Steps (thousands)",
+       fill = "Sleep Level") +
+  theme_light() +
+  theme(legend.position = "none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+```
+
+Here we see that the majority of users, spend around 25-30 minutes awake
+in bed, with an increase to around 50 minutes awake in bed in users who
+took between 7,000 to 10,000 steps daily, with a gradual decrease in
+awake time in users who took 10,000 or more steps daily. We can also see
+a couple of outliers - those may possibly be users who suffer from some
+kind of sleep issues like insomnia or Restless Leg Syndrome (RLS), etc.
+
+## Weight Analysis
+
+### Weight by Distance
+
+Let's take a look how users' weight is affected by distance covered.
+
+*We should make a note here that due to the weight log having only 8 users, we should take any results here with a measure of caution.*
+
+```{r, out.width="100%"}
+# Join (full) daily_activity with weight_log
+daily_act_weight <- full_join(daily_activity, weight_log,
+                              by = c("id", "date", "weekday"))
+daily_act_weight %>% 
+  select(id, weight_pounds, total_distance) %>% 
+  group_by(id) %>% 
+  summarise_all(list(~mean(., na.rm = TRUE))) %>% 
+  drop_na() %>% 
+  mutate(id = factor(id)) %>% 
+  ggplot(aes(x = weight_pounds,
+             y= total_distance,
+             fill = id)) +
+  geom_point(aes(color = id,
+                 size = weight_pounds),
+             alpha = 0.5) +
+  scale_y_continuous(breaks = pretty_breaks(n = 8)) +
+  scale_x_continuous(breaks = pretty_breaks(4)) +
+  scale_size(range = c(1.5, 15)) +
+  scale_color_viridis_d() +
+  labs(title = "Weight by Distance",
+       caption = 'Data by FitBit Fitness Tracker',
+       x = "Weight (pounds)",
+       y = "Distance (miles)") +
+  theme_light() +
+  theme(legend.position = "none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+```
+
+WE can see that the majority of users (62.5%) move between 5 and 8 miles and are in healthy weight categories, with one extreme outlier who seems to cover very little distance and weighs close to 300 pounds.
+
+### Weight by Steps
+
+Let's take a similar approach and look into weight by steps taken.
+
+```{r, out.width="100%"}
+daily_act_weight %>% 
+  select(id, weight_pounds, total_steps) %>% 
+  group_by(id) %>% 
+  summarise_all(list(~mean(., na.rm = TRUE))) %>% 
+  drop_na() %>% 
+  mutate(id = factor(id)) %>% 
+  ggplot(aes(x = weight_pounds,
+             y= total_steps,
+             fill = id)) +
+  geom_point(aes(color = id,
+                 size = weight_pounds),
+             alpha = 0.5) +
+  scale_y_continuous(labels = comma,
+                     breaks = pretty_breaks(n = 8)) +
+  scale_x_continuous(breaks = pretty_breaks(4)) +
+  scale_size(range = c(1.5, 15)) +
+  scale_color_viridis_d() +
+  labs(title = "Weight by Steps",
+       caption = 'Data by FitBit Fitness Tracker',
+       x = "Weight (pounds)",
+       y = "Steps") +
+  theme_light() +
+  theme(legend.position = "none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+```
+
+We can see an almost identical pattern here, which makes sense due to the close (yet not direct) correlation between steps and distance.
+
+### Weight by Total Active Time
+
+Let's see how weight is affected by total active time of our participating users.
+
+```{r, out.width="100%"}
+daily_act_weight %>% 
+  select(id, weight_pounds, total_active_minutes) %>% 
+  group_by(id) %>% 
+  summarise_all(list(~mean(., na.rm = TRUE))) %>% 
+  drop_na() %>% 
+  mutate(id = factor(id)) %>% 
+  ggplot(aes(x = weight_pounds,
+             y= total_active_minutes,
+             fill = id)) +
+  geom_point(aes(color = id,
+                 size = weight_pounds),
+             alpha = 0.5) +
+  scale_y_continuous(labels = comma,
+                     breaks = pretty_breaks(n = 8)) +
+  scale_x_continuous(breaks = pretty_breaks(4)) +
+  scale_size(range = c(1.5, 15)) +
+  scale_color_viridis_d() +
+  labs(title = "Weight by Total Active Time",
+       caption = 'Data by FitBit Fitness Tracker',
+       x = "Weight (pounds)",
+       y = "Total Active Time (minutes)") +
+  theme_light() +
+  theme(legend.position = "none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+```
+
+Again, aside from the one outlier, who is very inactive compared to the rest of the participants, we see that the more active time spent, the lower the weight, in general.
+
+### Body Mass Index (BMI)
+
+Let's visualize the relationship between weight and BMI:
+
+```{r, out.width="100%"}
+weight_log %>% 
+  select(id, weight_pounds, bmi) %>% 
+  group_by(id) %>% 
+  summarise_all(list(~mean(., na.rm = TRUE))) %>% 
+  drop_na() %>% 
+  mutate(id = factor(id)) %>% 
+  ggplot(aes(x = weight_pounds,
+             y= bmi/100,
+             fill = id)) +
+  geom_point(aes(color = id,
+                 size = bmi),
+             alpha = 0.5) +
+  scale_y_continuous(labels = percent,
+                     breaks = pretty_breaks(n = 8)) +
+  scale_x_continuous(breaks = pretty_breaks(4)) +
+  scale_size(range = c(1.5, 15)) +
+  scale_color_viridis_d() +
+  labs(title = "Weight vs. Body Mass Index",
+       caption = 'Data by FitBit Fitness Tracker',
+       x = "Weight (pounds)",
+       y = "BMI") +
+  annotate("rect", xmin = 0, xmax = 350, ymax = 0.249, ymin = 0.185, fill = "#35B779FF", alpha = 0.1) +
+  annotate("text", x = 300, y = 0.26, label  = "Normal BMI Range", color = "#35B779FF") +
+  theme_light() +
+  theme(legend.position = "none",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+```
+
+We can see that all but three users are outside of the normal BMI range (for women). We can break participating users into four categories based on the [Body Mass Index Table](https://www.nhlbi.nih.gov/health/educational/lose_wt/BMI/bmi_tbl.pdf) from the *National Heart, Lung, and Blood Institute* -  to see into which BMI ranges the rest of our participating users fall.
+
+```{r, out.width="100%"}
+# Create data frame for mean BMI
+bmi_cats <- weight_log %>% 
+  select(id, weight_pounds, bmi) %>% 
+  group_by(id) %>% 
+  summarise(mean_weight_pounds = mean(weight_pounds),
+            mean_bmi = mean(bmi)) %>% 
+  mutate(weight_standard = factor(case_when(mean_bmi < 18.5 ~ "Underweight",
+                                            mean_bmi >= 18.5 & mean_bmi <= 24.9 ~ "Normal Weight",
+                                            mean_bmi >= 25.0 & mean_bmi <= 29.9 ~ "Overweight",
+                                            mean_bmi >= 30 ~ "Obese"),
+                                  levels = c("Underweight",
+                                             "Normal Weight",
+                                             "Overweight",
+                                             "Obese"))) %>%
+  drop_na()
+
+# Plot user id's by weight standards 
+ggplot(bmi_cats,
+       aes(x = mean_weight_pounds,
+           y = mean_bmi/100)) +
+  geom_point(aes(color = id, size = mean_bmi), alpha = 0.5) +
+  scale_size(range = c(1.5, 15)) +
+  scale_y_continuous(labels = percent,
+                     breaks = pretty_breaks(n = 8)) +
+  scale_x_continuous(breaks = pretty_breaks(4)) +
+  scale_color_viridis_d() +
+  labs(title = "Users by Weight Standards",
+       subtitle = "with mean weight and BMI",
+       caption = 'Data by FitBit Fitness Tracker',
+       y = "Mean BMI",
+       x = "Mean Weight (pounds)",
+       color = "User ID",
+       size = "Mean BMI (percent)") +
+  facet_wrap(~weight_standard) +
+  theme_light() +
+  theme(legend.position = "right",
+        text = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+```
+
+Again, We can see that all but three of the participating users are classified as **overweight** or **obese**, as defined by the *National Heart, Lung, and Blood Institute*.
+
+# Share
+
+1. The descriptive analysis of the **heart rate** data revealed that in some cases, heart rates **bottomed at 36 beats per minute and topped at 203**. For moderate-intensity physical activity, the target heart rate should be between 64% and 76%^[Deborah Riebe, Jonathan K Ehrman, Gary Liguori, Meir Magal. Chapter 6 General Principles of Exercise Prescription. In: ACSM’s Guidelines for Exercise Testing and Prescription. 10th Ed. Wolters Kluwer/Lippincott Williams & Wilkins, Philadelphia, PA: 2018, 143-179.] ^[Physical Activity Guidelines Advisory Committee. Physical Activity Guidelines Advisory Committee Report, 2008. Washington, DC: U.S. Dept of Health and Human Services; 2008.], and shouldn't fall below 40 beats per minute. 
+Bellabeat should consider, if not yet available, to allow users to set warning criteria for when heartbeat exceeds certain preset beats per minutes.
+
+2. Bellabeat should encourage more users to participate in sleep and weight logging. Perhaps create some kind of social aspect to the companion app where users can gain accomplishment badges, similar to what is offered by the [*Garmin Connect*](https://connect.garmin.com/) app.
+
+3. The data reveals that *light intensity* activity is dominant both by time and and distance coverered. In [this article](https://www.etsu.edu/exercise-is-medicine/guidelines.php) on the East Tennessee State University, the American College of Sport Medicine recommends moderate-intensity activity for a minimum of 30 minutes **OR** high-intensity activity for a minimum of 20 minutes, three times per week. *Bellabeat should use these standards in designing notifications and reminders for users*.
+
+4. The data shows that 57% of the participating users fall into a sedentary classification, and sedentary time takes up 81.3% and is most prevalent during the week (possibly due to many users having sedentary jobs). *Bellabeat could use notifications to remind users to get up for a short walk every hour*, in order to reduce sedentary time.
+[This article](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7700832/) on the National Institute of Health (NIH) website, lists **six major health risks** associated with a sedentary lifestyle.
+
+5. Analysis of the sleep data revealed that users who have had 10,000 steps per day or above, experienced better sleep. Bellabeats should encourage users to meet a minimum of 7,500-10,000 steps per day in order to benefit from better sleep quality.
+
+6. Weight log analysis showed that the majority of participating users were classified as *overweight*. Although a sensitive subject, being overweight can pose many health risks, specifically cardiovascular. Bellabeat should encourage more users to use the weight log features and encourage users to reduce their BMI and maintain healthy weight. This can be done with notifications and a reward system on the app.
+
+<br>
+
+<center><font size="2"> **Thank you for taking the time to read through this case study! I look forward to your comments with any criticism and/or questions, and please upvote if you enjoyed. Keep reading on for a few thank you's and citations. **</font> </center>
+
+# Gratitudes and Citations
+
+## Gratitudes
+
+A special thanks to [Miguel Fzzz](https://www.kaggle.com/miguelfzzz), whose own [work](https://www.kaggle.com/code/miguelfzzz/bellabeat-data-analysis-discovering-trends/report) was a great guide for me.
+
+## Citations
+
+* Firke S (2023). _janitor: Simple Tools for Examining and Cleaning Dirty Data_. R package version 2.2.0,
+  <https://CRAN.R-project.org/package=janitor>.
+  
+* H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
+
+* Pedersen T, Robinson D (2022). _gganimate: A Grammar of Animated Graphics_. R package version 1.0.8,
+  <https://CRAN.R-project.org/package=gganimate>.
+  
+* Xie Y (2023). _knitr: A General-Purpose Package for Dynamic Report Generation in R_. R package version 1.45,
+  <https://yihui.org/knitr/>.
+
+  Yihui Xie (2015) Dynamic Documents with R and knitr. 2nd edition. Chapman and Hall/CRC. ISBN 978-1498716963
+
+  Yihui Xie (2014) knitr: A Comprehensive Tool for Reproducible Research in R. In Victoria Stodden, Friedrich Leisch and Roger
+  D. Peng, editors, Implementing Reproducible Computational Research. Chapman and Hall/CRC. ISBN 978-1466561595
+  
+*  Ooms J, Kornel Lesiński, Authors of the dependency Rust crates (2023). _gifski: Highest Quality GIF Encoder_. R package
+  version 1.12.0-2, <https://CRAN.R-project.org/package=gifski>.
+
+* C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny. Chapman and Hall/CRC Florida, 2020.
+
+* Wickham H, Pedersen T, Seidel D (2023). _scales: Scale Functions for Visualization_. R package version 1.3.0,
+  <https://CRAN.R-project.org/package=scales>.
+  
+* Simon Garnier, Noam Ross, Robert Rudis, Antônio P. Camargo, Marco Sciaini, and Cédric Scherer (2023). viridis(Lite) -
+  Colorblind-Friendly Color Maps for R. viridis package version 0.6.4.
+
+*  R Core Team (2023). _R: A Language and Environment for Statistical Computing_. R Foundation for Statistical Computing, Vienna, Austria. <https://www.R-project.org/>.
+
+* Auguie B (2017). _gridExtra: Miscellaneous Functions for "Grid" Graphics_. R package version 2.3,
+  <https://CRAN.R-project.org/package=gridExtra>.
+
+* Hadley Wickham (2007). Reshaping Data with the reshape Package. Journal of Statistical Software, 21(12), 1-20. URL
+  http://www.jstatsoft.org/v21/i12/.
